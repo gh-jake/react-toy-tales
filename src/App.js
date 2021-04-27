@@ -61,15 +61,47 @@ class App extends React.Component{
   toyAdd = (toyObj) => { return <ToyCard toy={toyObj} likeToy={this.addLikes} deleteToy={this.deleteToy}/>}
 
   addLikes = (event) => {
-    console.log(event.target.parentNode);
+    // this.componentDidMount();
+    const targetObj = this.state.toys.find(toy => toy.id == event.target.parentNode.id);
+    targetObj.likes += 1;
+    const prevLikes = targetObj.likes;
+    fetch(`http://localhost:3000/toys/${targetObj.id}`, {
+      method: "PATCH" ,
+      headers:
+      {
+        "Content-Type": "application/json" ,
+        Accept: "application/json"
+      }, 
+
+      body: JSON.stringify({
+        "likes": prevLikes + 1
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      this.setState({
+        ...this.state, 
+        likes: data.likes
+      })
+    });
+    console.log(this.state.toys)
   }
 
   deleteToy = (event) => {
-    const toyArray = this.state.toys.filter(toy => toy.id != event.target.parentNode.id);
+    const targetId = event.target.parentNode.id;
+    const toyArray = this.state.toys.filter(toy => toy.id != targetId);
     this.setState({
       toys: toyArray
     }) 
-    // console.log(event.target.parentNode);
+    fetch(`http://localhost:3000/toys/${targetId}`, {
+      method: "DELETE" ,
+      headers:
+      {
+        "Content-Type": "application/json" ,
+        Accept: "application/json"
+      }
+    })
+    
 
   }
 
